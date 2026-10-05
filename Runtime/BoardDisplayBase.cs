@@ -1,3 +1,5 @@
+namespace MelodySuite.Match3.Runtime
+{
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,34 +10,20 @@ using UnityEngine.InputSystem;
 
 namespace MelodySuite.Match3.Runtime
 {
-    public class BoardDisplay : MonoBehaviour, IBoardHandler
+    public abstract class BoardDisplayBase : MonoBehaviour, IBoardHandler
     {
 
         [SerializeField] private bool interactable = true;
 
         [SerializeField] private bool animateDrag = false;
         
-        [Range(1, 16)] public int width = 1;
-        [Range(1, 16)] public int height = 1;
-        
-        [SerializeField] private GameObject piecePrefab;
-        
-        [Header("Grid")]
-        [SerializeField] private GameObject tilePrefab;
-        
-        #region DisplaySettings
-
-        private float xOffset = 0;
-        private float yOffset = 0;
-
-        public float tileScale = 1;
-        public float pieceScale = 1;
-        public float borderPadding = 0;
-
-        #endregion
+        [SerializeField] private BoardSettings boardSettings;
         
         [Header("Optional")]
         [SerializeField] private SpriteRenderer border;
+        public float borderPadding = 0;
+        
+        [SerializeField] private bool generateOnAwake;
         
         private Transform tileParent;
         
@@ -53,11 +41,18 @@ namespace MelodySuite.Match3.Runtime
 
         private BoardPosition clickedTile;
 
-        private SpriteRenderer tilePrefabSpriteRenderer;
+        // private SpriteRenderer tilePrefabSpriteRenderer;
 
+        public abstract Vector2 GetTileSize(GameObject tilePrefab);
+        
         public readonly UnityEvent<List<Match>> OnMatch = new();
         public readonly UnityEvent OnMoveStart = new();
         public readonly UnityEvent OnMoveResolved = new();
+        
+        public UnityEvent OnVisualSwap = new();
+        
+        public int width => boardSettings.width;
+        public int height => boardSettings.height;
         
         public bool Interactable
         {
@@ -86,11 +81,9 @@ namespace MelodySuite.Match3.Runtime
         {
             if (!gameObject.activeInHierarchy)
                 return;
-            tileScale = Math.Max(tileScale, 0.01f);
-            pieceScale = Math.Max(pieceScale, 0.01f);
 
-            if (tilePrefabSpriteRenderer == null)
-                tilePrefabSpriteRenderer = tilePrefab.GetComponent<SpriteRenderer>();
+            // if (tilePrefabSpriteRenderer == null)
+            //     tilePrefabSpriteRenderer = boardSettings.tilePrefab.GetComponent<SpriteRenderer>();
 
 
             tileParent = transform.Find("tiles");
@@ -119,11 +112,9 @@ namespace MelodySuite.Match3.Runtime
         {
             if (!gameObject.activeInHierarchy)
                 return;
-            tileScale = Math.Max(tileScale, 0.01f);
-            pieceScale = Math.Max(pieceScale, 0.01f);
-
-            if (tilePrefabSpriteRenderer == null)
-                tilePrefabSpriteRenderer = tilePrefab.GetComponent<SpriteRenderer>();
+            
+            // if (tilePrefabSpriteRenderer == null)
+            //     tilePrefabSpriteRenderer = boardSettings.tilePrefab.GetComponent<SpriteRenderer>();
 
 
             tileParent = transform.Find("tiles");
@@ -180,14 +171,17 @@ namespace MelodySuite.Match3.Runtime
         private void Awake()
         {
             InitializeDisplay();
+            if (generateOnAwake)
+                GenerateBoard();
         }
 
         private void SpawnTiles()
         {
-            var spriteRenderer = tilePrefabSpriteRenderer;
-            Vector2 spriteSize = spriteRenderer.bounds.size;
-            float xSpacing = spriteSize.x * tileScale;
-            float ySpacing = spriteSize.y * tileScale;
+            // var spriteRenderer = tilePrefabSpriteRenderer;
+            // Vector2 spriteSize = spriteRenderer.bounds.size;
+            var spriteSize = GetTileSize(boardSettings.tilePrefab);
+            float xSpacing = spriteSize.x * boardSettings.tileScale;
+            float ySpacing = spriteSize.y * boardSettings.tileScale;
             
             string GetBoardPosStr(BoardPosition pos)
             {
@@ -212,14 +206,14 @@ namespace MelodySuite.Match3.Runtime
 
                 if (!child)
                 {
-                    var obj = Instantiate(tilePrefab, Vector3.zero, Quaternion.identity, tileParent);
+                    var obj = Instantiate(boardSettings.tilePrefab, Vector3.zero, Quaternion.identity, tileParent);
                     obj.transform.name = str;
                     child = obj.transform;
                 }
 
                 child.GetComponent<TileObject>().Init(boardPosition.Row, boardPosition.Column);
 
-                child.transform.localScale = new Vector3(tileScale, tileScale, tileScale);
+                child.transform.localScale = new Vector3(boardSettings.tileScale, boardSettings.tileScale, boardSettings.tileScale);
                 child.transform.localPosition = spawnPos;
             }
 
@@ -236,8 +230,8 @@ namespace MelodySuite.Match3.Runtime
             border.drawMode = SpriteDrawMode.Tiled;
             border.size = new Vector2(totalGridWidth / scaleX, totalGridHeight / scaleY);
 
-            float borderCenterX = (xOffset - (xSpacing / 2f)) + ((totalGridWidth / 2f) - (borderPadding / 2f));
-            float borderCenterY = yOffset + ((totalGridHeight / 2f) - (borderPadding / 2f));
+            float borderCenterX = (boardSettings.xOffset - (xSpacing / 2f)) + ((totalGridWidth / 2f) - (borderPadding / 2f));
+            float borderCenterY = boardSettings.yOffset + ((totalGridHeight / 2f) - (borderPadding / 2f));
 
             border.transform.position = tileParent.position + new Vector3(borderCenterX, borderCenterY, 0);
         }
@@ -249,18 +243,19 @@ namespace MelodySuite.Match3.Runtime
 
         public Vector2 GetTileLocalSpawnPosition(int row, int column)
         {
-            var spriteRenderer = tilePrefabSpriteRenderer;
-            Vector2 spriteSize = spriteRenderer.bounds.size;
-            float xSpacing = spriteSize.x * tileScale;
-            float ySpacing = spriteSize.y * tileScale;
+            // var spriteRenderer = tilePrefabSpriteRenderer;
+            // Vector2 spriteSize = spriteRenderer.bounds.size;
+            var spriteSize = GetTileSize(boardSettings.tilePrefab);
+            float xSpacing = spriteSize.x * boardSettings.tileScale;
+            float ySpacing = spriteSize.y * boardSettings.tileScale;
 
             return GetTileLocalSpawnPosition(row, column, xSpacing, ySpacing);
         }
 
         private Vector2 GetTileLocalSpawnPosition(int row, int column, float xSpacing, float ySpacing)
         {
-            float xStartOffset = xOffset;
-            float yStartOffset = yOffset + (ySpacing / 2f);
+            float xStartOffset = boardSettings.xOffset;
+            float yStartOffset = boardSettings.yOffset + (ySpacing / 2f);
             float posX = (column * xSpacing) + xStartOffset;
             float posY = (row * ySpacing) + yStartOffset;
 
@@ -329,9 +324,9 @@ namespace MelodySuite.Match3.Runtime
         private PieceObject SpawnPiece(Vector2 localSpawnPosition, GamePiece piece)
         {
             // Debug.Log("Spawn Pos: " + localSpawnPosition);
-            var obj = Instantiate(piecePrefab, Vector3.zero, Quaternion.identity, piecesParent);
+            var obj = Instantiate(boardSettings.piecePrefab, Vector3.zero, Quaternion.identity, piecesParent);
             obj.transform.localPosition = localSpawnPosition;
-            obj.transform.localScale = new Vector3(pieceScale, pieceScale, pieceScale);
+            obj.transform.localScale = new Vector3(boardSettings.pieceScale, boardSettings.pieceScale, boardSettings.pieceScale);
             obj.SetActive(true);
             var pieceObj = obj.GetComponent<PieceObject>();
             pieceObj.Init(piece);
@@ -366,19 +361,21 @@ namespace MelodySuite.Match3.Runtime
             yield return null;
             foreach (var match in matches)
             {
-                List<PieceObject> piecesInMatch = new();
                 foreach (var vector2Int in match.Tiles)
                 {
                     var piece = displayed[vector2Int.Row][vector2Int.Column];
                     piece.transform.SetParent(null);
-                    piecesInMatch.Add(piece);
-                }
-            
-                foreach (var piece in piecesInMatch)
-                {
-                    LeanTween.scale(piece.gameObject, piece.transform.localScale * 3, 0.2f)
-                        .setOnComplete(() => Destroy(piece.gameObject));
-                    LeanTween.alpha(piece.gameObject, 0, 0.2f);
+                    if (piece.TryGetComponent<PieceAnimator>(out var animator) && animator.isActiveAndEnabled)
+                    {
+                        animator.Match(() =>
+                        {
+                            Destroy(piece.gameObject);
+                        });
+                    }
+                    else
+                    {
+                        Destroy(piece.gameObject);
+                    }
                 }
             }
 
@@ -421,7 +418,7 @@ namespace MelodySuite.Match3.Runtime
 
             if (!displayBoard.Swap(current, target, Board.SwapType.ShiftTiles, movements, checkIfMatches: false))
                 return false;
-
+         
             foreach (var (from, to) in movements)
             {
                 var toPiece = GetPieceObject(to);
@@ -435,6 +432,8 @@ namespace MelodySuite.Match3.Runtime
                 displayed[from.Row][from.Column] = toPiece;
             }
 
+            OnVisualSwap.Invoke();
+            
             dragObject.Highlight(false);
 
             foreach (var pieceComponentse in displayed)
@@ -465,6 +464,20 @@ namespace MelodySuite.Match3.Runtime
             return true;
         }
 
+        private IEnumerator WaitForPiecesToAnimateThenExecute(Action onComplete)
+        {
+            
+            for (var i = 0; i < displayed.Length; i++)
+            {
+                for (int j = 0; j < displayed[i].Length; j++)
+                {
+                    var piece = displayed[i][j];
+                    yield return new WaitUntil(() => !piece.Animating);
+                }
+            }
+            onComplete();
+        } 
+        
         private void RestoreBoard(BoardPosition ignore = null)
         {
             if (dragObject)
@@ -492,7 +505,9 @@ namespace MelodySuite.Match3.Runtime
                 return;
             if (dragObject == null)
                 return;
-            dragObject.transform.position = mousePosition;
+            
+            // add drag here
+            
             if (clickedTile == null)
                 return;
 
@@ -502,8 +517,8 @@ namespace MelodySuite.Match3.Runtime
             var updated = current != last;
             if (!updated)
                 return;
-
-            // Debug.Log("Updated: " + last + " -> " + current);
+            
+            // todo add drag
 
             if (current != null && displayBoard.InLine(clickedTile, current))
             {
@@ -537,6 +552,8 @@ namespace MelodySuite.Match3.Runtime
 
             var clone = Instantiate(piece!.gameObject, null);
             dragObject = clone.GetComponent<PieceObject>();
+            dragObject.transform.position = piece.transform.position;
+            dragObject.transform.rotation = piece.transform.rotation;
 
             dragObject.GetComponent<SpriteRenderer>().sortingOrder = 99;
             piece.gameObject.SetActive(false);
@@ -631,19 +648,7 @@ namespace MelodySuite.Match3.Runtime
         //     OnMoveResolved.Invoke();
         // }
 
-
-        public BoardPosition GetTileFromWorldPosition(Vector2 mouseWorldPosition)
-        {
-            RaycastHit2D[] hits = Physics2D.RaycastAll(mouseWorldPosition, Vector2.zero);
-            foreach (var raycastHit2D in hits)
-            {
-                if (raycastHit2D.transform != null &&
-                    raycastHit2D.transform.TryGetComponent<TileObject>(out var tileObject))
-                    return new BoardPosition(tileObject.Row, tileObject.Column);
-            }
-
-            return null;
-        }
+        public abstract BoardPosition GetTileFromPoint(Vector3 point);
 
         [ContextMenu("generate")]
         public void GenerateBoard()
@@ -687,15 +692,21 @@ namespace MelodySuite.Match3.Runtime
         {
             if (manualUpdate)
                 return;
-            var pos = Mouse.current.position.ReadValue();
-            var mousePos = new Vector2(Camera.main.ScreenToWorldPoint(pos).x, Camera.main.ScreenToWorldPoint(pos).y);
-            Tick(mousePos);
+            
+            Tick();
         }
 
-        public void Tick(Vector2 mousePos)
+        public void Tick()
         {
+            Vector2 screenPosition = Mouse.current.position.ReadValue();
+            Vector3 screenPoint = screenPosition;
+            screenPoint.z = Mathf.Abs(Camera.main.transform.position.z);
+
+            var point = Camera.main.ScreenToWorldPoint(screenPoint);
+            
             var lastHoverTile = currentHoverTile;
-            currentHoverTile = GetTileFromWorldPosition(mousePos);
+            currentHoverTile = GetTileFromPoint(point);
+            
             // Debug.Log("Tile: " + curentHoverPiece);
                 
             if (Mouse.current.leftButton.wasPressedThisFrame)
@@ -705,7 +716,7 @@ namespace MelodySuite.Match3.Runtime
         
             if (Mouse.current.leftButton.isPressed)
             {
-                OnDrag(currentHoverTile, lastHoverTile, mousePos);
+                OnDrag(currentHoverTile, lastHoverTile, point);
             }
 
             if (Mouse.current.leftButton.wasReleasedThisFrame)
@@ -725,4 +736,5 @@ namespace MelodySuite.Match3.Runtime
             StartCoroutine(mainBoard.Matches());
         }
     }
+}
 }

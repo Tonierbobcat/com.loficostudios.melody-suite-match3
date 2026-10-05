@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using MelodySuite.Match3.Runtime.MelodySuite.Match3.Runtime;
 using UnityEngine;
 
 namespace MelodySuite.Match3.Runtime
@@ -14,7 +15,7 @@ namespace MelodySuite.Match3.Runtime
 
         [SerializeField] private float fallDelaySeconds = 0.1f; 
         
-        public IEnumerator Fall(FallData fallData, BoardDisplay boardDisplay, Func<Vector2, BoardPosition, PieceObject> spawnPiece)
+        public IEnumerator Fall(FallData fallData, BoardDisplayBase boardDisplay, Func<Vector2, BoardPosition, PieceObject> spawnPiece)
         {
             var width = boardDisplay.width;
             var height = boardDisplay.height;
@@ -36,7 +37,7 @@ namespace MelodySuite.Match3.Runtime
 
                 var distance = Vector2.Distance(boardDisplay.GetTileLocalSpawnPosition(origin.y, origin.x), destinationPos);
 
-                LeanTween.move(
+                LeanTween.moveLocal(
                     piece.gameObject,
                     destinationPos,
                     distance / fallSpeed

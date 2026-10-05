@@ -11,6 +11,7 @@ namespace MelodySuite.Match3.Runtime
     
         public void AnimateUpdatePosition(Vector2 localPosition)
         {
+            Animating = true;
             // UpdatePosition(row, column);
             LeanTween.cancel(gameObject);
         

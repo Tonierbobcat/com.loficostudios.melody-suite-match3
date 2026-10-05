@@ -9,5 +9,12 @@
   "unity": "6000.0",
   "author": {
     "name": "Logan"
-  }
+  },
+  "samples": [
+    {
+      "displayName": "Demo",
+      "description": "Demo scene showing the Match3 System.",
+      "path": "Samples~/Demo"
+    }
+  ]
 }

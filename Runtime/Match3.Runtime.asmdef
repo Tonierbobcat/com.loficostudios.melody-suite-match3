@@ -3,7 +3,8 @@
     "rootNamespace": "MelodySuite.Match3.Runtime",
     "references": [
         "GUID:3f3136396351c413fa05e5fd3897658c",
-        "GUID:75469ad4d38634e559750d17036d5f7c"
+        "GUID:75469ad4d38634e559750d17036d5f7c",
+        "GUID:af952bcd32b35e095beced13e1c12f36"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
