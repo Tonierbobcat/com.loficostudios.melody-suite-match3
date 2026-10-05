@@ -1,0 +1,16 @@
+{
+    "name": "Match3.Editor",
+    "rootNamespace": "MelodySuite.Match3.Editor",
+    "references": [
+        "GUID:f74425e1a03f611a092e45f2cbd2a0f8"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

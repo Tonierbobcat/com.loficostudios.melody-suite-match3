@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 50525facee1439132a78cfd25c14e7d5
+timeCreated: 1427917971
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 3595
+  packageName: LeanTween
+  packageVersion: 2.51
+  assetPath: Assets/LeanTween/Framework/LeanTest.cs
+  uploadId: 469983

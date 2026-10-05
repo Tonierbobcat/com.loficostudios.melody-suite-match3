@@ -1,0 +1,13 @@
+{
+  "name": "com.loficostudios.match3",
+  "version": "1.0.0",
+  "dependencies": {
+    "com.loficostudios.core": "1.0.0"
+  },
+  "displayName": "Match3 System",
+  "description": "A reusable match3 system for Unity.",
+  "unity": "6000.0",
+  "author": {
+    "name": "Logan"
+  }
+}

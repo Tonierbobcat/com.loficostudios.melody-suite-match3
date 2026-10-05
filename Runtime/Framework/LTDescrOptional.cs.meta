@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: f9406a4caf07d9030ab95b53e8a9ff31
+timeCreated: 1471504769
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 3595
+  packageName: LeanTween
+  packageVersion: 2.51
+  assetPath: Assets/LeanTween/Framework/LTDescrOptional.cs
+  uploadId: 469983

@@ -1,0 +1,7 @@
+LeanTween
+Portions of this software incorporate LeanTween, Copyright © 2013–2026 Russell Savage / Dented Pixel.
+LeanTween is distributed under the MIT License.
+The LeanTween source and license are available at: https://github.com/dentedpixel/LeanTween
+
+Easing Equations
+Portions of LeanTween incorporate easing equations by Robert Penner, Copyright © 2001 Robert Penner. These portions are distributed under the terms included in the LeanTween source.
